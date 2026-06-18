@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Смета: {{ calc.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm 15mm 20mm 15mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+        }
+
+        /* Header */
+        .doc-header {
+            border-bottom: 3px solid #1ABC9C;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .doc-header h1 {
+            font-size: 18pt;
+            color: #2C3E50;
+            margin: 0 0 5px 0;
+        }
+
+        .doc-header .company {
+            font-size: 10pt;
+            color: #1ABC9C;
+            font-weight: bold;
+        }
+
+        /* Params table */
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .params-table td {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            font-size: 10pt;
+        }
+
+        .params-table .label {
+            background: #f5f5f5;
+            font-weight: bold;
+            width: 30%;
+            color: #2C3E50;
+        }
+
+        /* Section heading */
+        .section-title {
+            background: #2C3E50;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 11pt;
+            font-weight: bold;
+            margin: 15px 0 0 0;
+        }
+
+        /* Data tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .data-table th {
+            background: #34495E;
+            color: #fff;
+            padding: 6px 8px;
+            font-size: 9pt;
+            font-weight: bold;
+            text-align: left;
+            border: 1px solid #2C3E50;
+        }
+
+        .data-table td {
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            font-size: 9.5pt;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .data-table .num {
+            text-align: center;
+            width: 5%;
+        }
+
+        .data-table .name-col {
+            width: 35%;
+        }
+
+        .data-table .unit-col {
+            width: 8%;
+            text-align: center;
+        }
+
+        .data-table .qty-col {
+            width: 12%;
+            text-align: right;
+        }
+
+        .data-table .price-col {
+            width: 17%;
+            text-align: right;
+        }
+
+        .data-table .total-col {
+            width: 18%;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .subtotal-row {
+            background: #ecf0f1 !important;
+            font-weight: bold;
+        }
+
+        .subtotal-row td {
+            border-top: 2px solid #bdc3c7;
+        }
+
+        /* Summary table */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .summary-table td {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            font-size: 10.5pt;
+        }
+
+        .summary-table .label-col {
+            width: 70%;
+        }
+
+        .summary-table .value-col {
+            width: 30%;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .summary-table .grand-total {
+            background: #1ABC9C;
+            color: #fff;
+            font-size: 13pt;
+            font-weight: bold;
+        }
+
+        .summary-table .grand-total td {
+            border-color: #16A085;
+            padding: 10px;
+        }
+
+        .summary-table .per-sqm {
+            background: #f5f5f5;
+        }
+
+        /* Footer */
+        .doc-footer {
+            margin-top: 30px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            font-size: 8.5pt;
+            color: #999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Document header -->
+    <div class="doc-header">
+        <div class="company">Санлайн-Строй</div>
+        <h1>Смета: {{ calc.name }}</h1>
+    </div>
+
+    <!-- Object parameters -->
+    <table class="params-table">
+        <tr>
+            <td class="label">Тип объекта</td>
+            <td>
+                {% if calc.object_type == 'residential' %}Жилой дом
+                {% elif calc.object_type == 'commercial' %}Коммерческое здание
+                {% elif calc.object_type == 'industrial' %}Промышленный объект
+                {% elif calc.object_type == 'cottage' %}Коттедж / Дача
+                {% elif calc.object_type == 'garage' %}Гараж / Хозпостройка
+                {% else %}{{ calc.object_type }}
+                {% endif %}
+            </td>
+            <td class="label">Площадь</td>
+            <td>{{ "%.1f"|format(calc.total_area) }} м²</td>
+        </tr>
+        <tr>
+            <td class="label">Этажность</td>
+            <td>{{ calc.floors }}</td>
+            <td class="label">Фундамент</td>
+            <td>
+                {% if calc.foundation_type == 'strip' %}Ленточный
+                {% elif calc.foundation_type == 'slab' %}Плитный
+                {% elif calc.foundation_type == 'pile' %}Свайный
+                {% elif calc.foundation_type == 'columnar' %}Столбчатый
+                {% else %}{{ calc.foundation_type }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Кровля</td>
+            <td>
+                {% if calc.roof_type == 'gable' %}Двускатная
+                {% elif calc.roof_type == 'hip' %}Вальмовая
+                {% elif calc.roof_type == 'flat' %}Плоская
+                {% elif calc.roof_type == 'mansard' %}Мансардная
+                {% elif calc.roof_type == 'shed' %}Односкатная
+                {% else %}{{ calc.roof_type }}
+                {% endif %}
+            </td>
+            <td class="label">Примечания</td>
+            <td>{{ calc.notes or '—' }}</td>
+        </tr>
+    </table>
+
+    <!-- Category tables -->
+    {% for cat_key, cat_label in category_names.items() %}
+    {% if cat_key in categories %}
+    <div class="section-title">{{ cat_label }}</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="num">№</th>
+                <th class="name-col">Наименование</th>
+                <th class="unit-col">Ед.</th>
+                <th class="qty-col">Кол-во</th>
+                <th class="price-col">Цена (₽)</th>
+                <th class="total-col">Сумма (₽)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in categories[cat_key] %}
+            <tr>
+                <td class="num">{{ loop.index }}</td>
+                <td class="name-col">{{ item.name }}</td>
+                <td class="unit-col">{{ item.unit }}</td>
+                <td class="qty-col">{{ item.quantity }}</td>
+                <td class="price-col">{{ "{:,.0f}".format(item.unit_price).replace(",", " ") }}</td>
+                <td class="total-col">{{ "{:,.0f}".format(item.total_price).replace(",", " ") }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="subtotal-row">
+                <td colspan="5" style="text-align: right;">Итого {{ cat_label.lower() }}:</td>
+                <td class="total-col">{{ "{:,.0f}".format(category_totals[cat_key]).replace(",", " ") }} ₽</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Summary -->
+    <table class="summary-table">
+        {% for cat_key, cat_label in category_names.items() %}
+        {% if cat_key in categories %}
+        <tr>
+            <td class="label-col">{{ cat_label }}</td>
+            <td class="value-col">{{ "{:,.0f}".format(category_totals[cat_key]).replace(",", " ") }} ₽</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        <tr class="grand-total">
+            <td class="label-col">ИТОГО</td>
+            <td class="value-col">{{ "{:,.0f}".format(calc.total_cost).replace(",", " ") }} ₽</td>
+        </tr>
+        <tr class="per-sqm">
+            <td class="label-col">Стоимость за м²</td>
+            <td class="value-col">
+                {% if calc.total_area > 0 %}
+                {{ "{:,.0f}".format(calc.total_cost / calc.total_area).replace(",", " ") }} ₽/м²
+                {% else %}—{% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <div class="doc-footer">
+        Сформировано: {{ calc.created_at.strftime('%d.%m.%Y %H:%M') }} | Санлайн-Строй | Калькулятор расчёта стоимости
+    </div>
+
+</body>
+</html>

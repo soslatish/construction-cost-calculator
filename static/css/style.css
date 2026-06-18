@@ -1,0 +1,269 @@
+:root {
+    --sl-primary: #1ABC9C;
+    --sl-primary-dark: #16A085;
+    --sl-dark: #2C3E50;
+    --sl-dark-light: #34495E;
+    --sl-text: #444;
+    --sl-text-light: #777;
+    --sl-bg: #F5F5F5;
+    --sl-white: #FFFFFF;
+    --sl-border: #E5E5E5;
+}
+
+body {
+    background-color: var(--sl-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--sl-text);
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Navbar */
+.navbar {
+    background: var(--sl-dark) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--sl-primary) !important;
+}
+
+.navbar .nav-link {
+    color: rgba(255,255,255,0.8) !important;
+    transition: color 0.2s;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: var(--sl-primary) !important;
+}
+
+.navbar .nav-link.text-light {
+    color: var(--sl-primary) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--sl-primary) !important;
+    border-color: var(--sl-primary) !important;
+    color: #fff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--sl-primary-dark) !important;
+    border-color: var(--sl-primary-dark) !important;
+}
+
+.btn-outline-primary {
+    color: var(--sl-primary) !important;
+    border-color: var(--sl-primary) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--sl-primary) !important;
+    color: #fff !important;
+}
+
+.btn-success {
+    background-color: var(--sl-primary) !important;
+    border-color: var(--sl-primary) !important;
+}
+
+.btn-success:hover {
+    background-color: var(--sl-primary-dark) !important;
+    border-color: var(--sl-primary-dark) !important;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    color: var(--sl-text);
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--sl-primary);
+    border-bottom-color: rgba(26, 188, 156, 0.3);
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+    color: var(--sl-primary) !important;
+    border-bottom-color: var(--sl-primary) !important;
+    background: transparent;
+}
+
+.tab-content {
+    background: var(--sl-white);
+    min-height: 400px;
+}
+
+/* Tables */
+.table input,
+.table select {
+    min-width: 80px;
+}
+
+.item-total {
+    vertical-align: middle !important;
+    padding-right: 12px !important;
+}
+
+.table thead th {
+    background-color: var(--sl-dark) !important;
+    color: #fff !important;
+    border-color: var(--sl-dark-light) !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.table-warning {
+    background-color: rgba(26, 188, 156, 0.1) !important;
+}
+
+.table-warning td {
+    color: var(--sl-dark) !important;
+}
+
+.table-primary {
+    background-color: rgba(26, 188, 156, 0.15) !important;
+}
+
+.table-info {
+    background-color: rgba(26, 188, 156, 0.08) !important;
+}
+
+/* Cards */
+.card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--sl-border);
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: var(--sl-dark) !important;
+    color: #fff !important;
+    border-radius: 7px 7px 0 0 !important;
+}
+
+.card-header h5,
+.card-header h6 {
+    color: #fff !important;
+}
+
+.border-primary {
+    border-color: var(--sl-primary) !important;
+}
+
+/* Badges */
+.badge.bg-primary {
+    background-color: var(--sl-primary) !important;
+}
+
+/* Links */
+a {
+    color: var(--sl-primary);
+}
+
+a:hover {
+    color: var(--sl-primary-dark);
+}
+
+/* Alerts */
+.alert-success {
+    background-color: rgba(26, 188, 156, 0.15);
+    border-color: var(--sl-primary);
+    color: #155724;
+}
+
+/* Form focus */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--sl-primary);
+    box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+}
+
+/* Footer */
+footer {
+    margin-top: auto !important;
+    background: var(--sl-dark) !important;
+    color: rgba(255,255,255,0.7) !important;
+}
+
+footer a {
+    color: var(--sl-primary) !important;
+}
+
+/* Role badges */
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.role-admin {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.role-manager {
+    background: var(--sl-primary);
+    color: #fff;
+}
+
+.role-viewer {
+    background: #95a5a6;
+    color: #fff;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--sl-primary) !important;
+}
+
+/* Page heading */
+h2 {
+    color: var(--sl-dark);
+    font-weight: 700;
+}
+
+/* Print */
+@media print {
+    .navbar, footer, .btn, .no-print {
+        display: none !important;
+    }
+    .tab-content {
+        border: none !important;
+    }
+    .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    .nav-tabs {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+}

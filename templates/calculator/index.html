@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% block title %}Калькулятор — Санлайн-Строй{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-calculator"></i> Калькулятор стоимости строительства</h2>
+
+{% if current_user.is_authenticated and not current_user.can_edit %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Вы вошли как наблюдатель. Редактирование и сохранение расчётов недоступно.
+</div>
+{% endif %}
+
+<ul class="nav nav-tabs" id="calcTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-params" type="button">
+            <i class="bi bi-gear"></i> Параметры
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-materials" type="button">
+            <i class="bi bi-bricks"></i> Материалы
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-works" type="button">
+            <i class="bi bi-hammer"></i> Работы
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-equipment" type="button">
+            <i class="bi bi-truck"></i> Оборудование
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-delivery" type="button">
+            <i class="bi bi-box-seam"></i> Доставка
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-overhead" type="button">
+            <i class="bi bi-cash-stack"></i> Накладные
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-total" type="button">
+            <i class="bi bi-clipboard-data"></i> Итого
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content border border-top-0 rounded-bottom p-4" id="calcTabContent">
+
+    <!-- Вкладка: Общие параметры -->
+    <div class="tab-pane fade show active" id="tab-params">
+        <h4 class="mb-3">Общие параметры объекта</h4>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="calc-name" class="form-label">Название расчёта</label>
+                <input type="text" class="form-control" id="calc-name" placeholder="Например: Дом 150 м²">
+            </div>
+            <div class="col-md-6">
+                <label for="object-type" class="form-label">Тип объекта</label>
+                <select class="form-select" id="object-type">
+                    <option value="residential">Жилой дом</option>
+                    <option value="commercial">Коммерческое здание</option>
+                    <option value="industrial">Промышленный объект</option>
+                    <option value="cottage">Коттедж / Дача</option>
+                    <option value="garage">Гараж / Хозпостройка</option>
+                    <option value="other">Другое</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="total-area" class="form-label">Общая площадь (м²)</label>
+                <input type="number" class="form-control" id="total-area" min="1" step="0.1" value="100">
+            </div>
+            <div class="col-md-4">
+                <label for="floors" class="form-label">Количество этажей</label>
+                <input type="number" class="form-control" id="floors" min="1" max="100" value="1">
+            </div>
+            <div class="col-md-4">
+                <label for="foundation-type" class="form-label">Тип фундамента</label>
+                <select class="form-select" id="foundation-type">
+                    <option value="strip">Ленточный</option>
+                    <option value="slab">Плитный</option>
+                    <option value="pile">Свайный</option>
+                    <option value="columnar">Столбчатый</option>
+                    <option value="none">Без фундамента</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="roof-type" class="form-label">Тип кровли</label>
+                <select class="form-select" id="roof-type">
+                    <option value="gable">Двускатная</option>
+                    <option value="hip">Вальмовая</option>
+                    <option value="flat">Плоская</option>
+                    <option value="mansard">Мансардная</option>
+                    <option value="shed">Односкатная</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <label for="notes" class="form-label">Примечания</label>
+                <input type="text" class="form-control" id="notes" placeholder="Дополнительная информация">
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка: Материалы -->
+    <div class="tab-pane fade" id="tab-materials">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Материалы</h4>
+            <button class="btn btn-success btn-sm" onclick="addRow('materials')">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="table-materials">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:30%">Наименование</th>
+                        <th style="width:12%">Ед. изм.</th>
+                        <th style="width:13%">Кол-во</th>
+                        <th style="width:15%">Цена за ед. (₽)</th>
+                        <th style="width:15%">Итого (₽)</th>
+                        <th style="width:10%"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="5" class="text-end">Итого материалы:</td>
+                        <td id="subtotal-materials">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка: Работы -->
+    <div class="tab-pane fade" id="tab-works">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Работы</h4>
+            <button class="btn btn-success btn-sm" onclick="addRow('works')">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="table-works">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:30%">Наименование работ</th>
+                        <th style="width:12%">Ед. изм.</th>
+                        <th style="width:13%">Кол-во</th>
+                        <th style="width:15%">Цена за ед. (₽)</th>
+                        <th style="width:15%">Итого (₽)</th>
+                        <th style="width:10%"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="5" class="text-end">Итого работы:</td>
+                        <td id="subtotal-works">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка: Оборудование -->
+    <div class="tab-pane fade" id="tab-equipment">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Оборудование</h4>
+            <button class="btn btn-success btn-sm" onclick="addRow('equipment')">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="table-equipment">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:30%">Наименование</th>
+                        <th style="width:12%">Ед. изм.</th>
+                        <th style="width:13%">Кол-во</th>
+                        <th style="width:15%">Цена за ед. (₽)</th>
+                        <th style="width:15%">Итого (₽)</th>
+                        <th style="width:10%"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="5" class="text-end">Итого оборудование:</td>
+                        <td id="subtotal-equipment">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка: Доставка -->
+    <div class="tab-pane fade" id="tab-delivery">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Доставка</h4>
+            <button class="btn btn-success btn-sm" onclick="addRow('delivery')">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="table-delivery">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:30%">Описание</th>
+                        <th style="width:12%">Ед. изм.</th>
+                        <th style="width:13%">Кол-во</th>
+                        <th style="width:15%">Цена за ед. (₽)</th>
+                        <th style="width:15%">Итого (₽)</th>
+                        <th style="width:10%"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="5" class="text-end">Итого доставка:</td>
+                        <td id="subtotal-delivery">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка: Накладные расходы -->
+    <div class="tab-pane fade" id="tab-overhead">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Накладные расходы</h4>
+            <button class="btn btn-success btn-sm" onclick="addRow('overhead')">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </button>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Непредвиденные расходы (% от суммы работ и материалов)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="contingency-percent" min="0" max="100" value="10" oninput="recalcTotal()">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div>
+                    <span class="text-muted">Сумма непредвиденных:</span>
+                    <span class="fw-bold fs-5" id="contingency-amount">0 ₽</span>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="table-overhead">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:30%">Наименование</th>
+                        <th style="width:12%">Ед. изм.</th>
+                        <th style="width:13%">Кол-во</th>
+                        <th style="width:15%">Цена за ед. (₽)</th>
+                        <th style="width:15%">Итого (₽)</th>
+                        <th style="width:10%"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="5" class="text-end">Итого накладные (без непредвиденных):</td>
+                        <td id="subtotal-overhead">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка: Итого -->
+    <div class="tab-pane fade" id="tab-total">
+        <h4 class="mb-3">Сводка расчёта</h4>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td class="w-75">Материалы</td>
+                    <td class="fw-bold text-end" id="total-materials">0 ₽</td>
+                </tr>
+                <tr>
+                    <td>Работы</td>
+                    <td class="fw-bold text-end" id="total-works">0 ₽</td>
+                </tr>
+                <tr>
+                    <td>Оборудование</td>
+                    <td class="fw-bold text-end" id="total-equipment">0 ₽</td>
+                </tr>
+                <tr>
+                    <td>Доставка</td>
+                    <td class="fw-bold text-end" id="total-delivery">0 ₽</td>
+                </tr>
+                <tr>
+                    <td>Накладные расходы</td>
+                    <td class="fw-bold text-end" id="total-overhead">0 ₽</td>
+                </tr>
+                <tr>
+                    <td>Непредвиденные расходы (<span id="total-contingency-pct">10</span>%)</td>
+                    <td class="fw-bold text-end" id="total-contingency">0 ₽</td>
+                </tr>
+                <tr class="table-primary fs-5">
+                    <td class="fw-bold">ИТОГО</td>
+                    <td class="fw-bold text-end" id="grand-total">0 ₽</td>
+                </tr>
+                <tr class="table-info">
+                    <td>Стоимость за м²</td>
+                    <td class="fw-bold text-end" id="cost-per-sqm">0 ₽/м²</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex gap-2 mt-3">
+            {% if current_user.is_authenticated and current_user.can_edit %}
+            <button class="btn btn-primary" onclick="saveCalculation()">
+                <i class="bi bi-save"></i> Сохранить расчёт
+            </button>
+            {% elif not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">
+                <i class="bi bi-box-arrow-in-right"></i> Войдите, чтобы сохранить
+            </a>
+            {% endif %}
+            <button class="btn btn-outline-secondary" onclick="printCalculation()">
+                <i class="bi bi-printer"></i> Печать
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const loadId = params.get('load');
+    if (loadId) {
+        loadCalculation(loadId);
+    }
+</script>
+{% endblock %}
