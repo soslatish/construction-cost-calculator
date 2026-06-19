@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
-from models import db, User, ROLE_VIEWER, ROLE_MANAGER
+from models import db, User, ROLE_VIEWER, ROLE_MANAGER, ROLE_ADMIN
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -159,3 +159,46 @@ def delete_user(user_id):
     db.session.commit()
     flash(f'Пользователь «{user.username}» удалён.', 'success')
     return redirect(url_for('auth.user_list'))
+
+
+@auth_bp.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        role = request.form.get('role', user.role)
+
+        if not username or not email:
+            flash('Имя и email обязательны.', 'error')
+            return render_template('auth/edit_user.html', user=user)
+
+        existing = User.query.filter_by(username=username).first()
+        if existing and existing.id != user.id:
+            flash('Пользователь с таким именем уже существует.', 'error')
+            return render_template('auth/edit_user.html', user=user)
+
+        existing = User.query.filter_by(email=email).first()
+        if existing and existing.id != user.id:
+            flash('Этот email уже зарегистрирован.', 'error')
+            return render_template('auth/edit_user.html', user=user)
+
+        if password:
+            if len(password) < 6:
+                flash('Пароль должен быть не менее 6 символов.', 'error')
+                return render_template('auth/edit_user.html', user=user)
+            user.set_password(password)
+
+        user.username = username
+        user.email = email
+        if not user.is_admin and role in (ROLE_VIEWER, ROLE_MANAGER, ROLE_ADMIN):
+            user.role = role
+
+        db.session.commit()
+        flash(f'Данные пользователя «{user.username}» обновлены.', 'success')
+        return redirect(url_for('auth.user_list'))
+
+    return render_template('auth/edit_user.html', user=user)

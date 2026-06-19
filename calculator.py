@@ -65,11 +65,11 @@ def save():
 @calc_bp.route('/history')
 @login_required
 def history():
-    if current_user.can_edit:
+    if current_user.is_admin:
+        calculations = Calculation.query.order_by(Calculation.created_at.desc()).all()
+    else:
         calculations = Calculation.query.filter_by(user_id=current_user.id)\
             .order_by(Calculation.created_at.desc()).all()
-    else:
-        calculations = Calculation.query.order_by(Calculation.created_at.desc()).all()
     return render_template('calculator/history.html', calculations=calculations)
 
 
@@ -77,8 +77,9 @@ def history():
 @login_required
 def report(calc_id):
     calc = Calculation.query.get_or_404(calc_id)
-    if not current_user.can_edit and calc.user_id != current_user.id:
-        pass
+    if not current_user.is_admin and calc.user_id != current_user.id:
+        flash('Доступ запрещён.', 'error')
+        return redirect(url_for('calc.history'))
 
     categories = {}
     for item in calc.items:
@@ -107,6 +108,9 @@ def report(calc_id):
 @login_required
 def report_pdf(calc_id):
     calc = Calculation.query.get_or_404(calc_id)
+    if not current_user.is_admin and calc.user_id != current_user.id:
+        flash('Доступ запрещён.', 'error')
+        return redirect(url_for('calc.history'))
 
     categories = {}
     for item in calc.items:
@@ -131,14 +135,20 @@ def report_pdf(calc_id):
                            category_names=category_names)
 
     try:
-        from weasyprint import HTML
-        pdf = HTML(string=html).write_pdf()
+        from xhtml2pdf import pisa
+        from io import BytesIO
+        result_buf = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=result_buf, encoding='utf-8')
+        if pisa_status.err:
+            flash('Ошибка генерации PDF.', 'error')
+            return redirect(url_for('calc.report', calc_id=calc_id))
+        pdf = result_buf.getvalue()
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename=smeta_{calc.id}.pdf'
         return response
     except ImportError:
-        flash('WeasyPrint не установлен. Экспорт PDF недоступен.', 'warning')
+        flash('Модуль xhtml2pdf не установлен. Экспорт PDF недоступен.', 'warning')
         return redirect(url_for('calc.report', calc_id=calc_id))
 
 
@@ -160,6 +170,8 @@ def delete(calc_id):
 @login_required
 def load(calc_id):
     calc = Calculation.query.get_or_404(calc_id)
+    if not current_user.is_admin and calc.user_id != current_user.id:
+        return jsonify({'error': 'Доступ запрещён'}), 403
 
     items = []
     for item in calc.items:

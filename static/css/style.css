@@ -1,6 +1,6 @@
 :root {
-    --sl-primary: #1ABC9C;
-    --sl-primary-dark: #16A085;
+    --sl-primary: #F7941D;
+    --sl-primary-dark: #E07B00;
     --sl-dark: #2C3E50;
     --sl-dark-light: #34495E;
     --sl-text: #444;
@@ -93,7 +93,7 @@ body {
 
 .nav-tabs .nav-link:hover {
     color: var(--sl-primary);
-    border-bottom-color: rgba(26, 188, 156, 0.3);
+    border-bottom-color: rgba(247, 148, 29, 0.3);
 }
 
 .nav-tabs .nav-link.active {
@@ -128,7 +128,7 @@ body {
 }
 
 .table-warning {
-    background-color: rgba(26, 188, 156, 0.1) !important;
+    background-color: rgba(247, 148, 29, 0.1) !important;
 }
 
 .table-warning td {
@@ -136,11 +136,11 @@ body {
 }
 
 .table-primary {
-    background-color: rgba(26, 188, 156, 0.15) !important;
+    background-color: rgba(247, 148, 29, 0.15) !important;
 }
 
 .table-info {
-    background-color: rgba(26, 188, 156, 0.08) !important;
+    background-color: rgba(247, 148, 29, 0.08) !important;
 }
 
 /* Cards */
@@ -181,16 +181,16 @@ a:hover {
 
 /* Alerts */
 .alert-success {
-    background-color: rgba(26, 188, 156, 0.15);
+    background-color: rgba(247, 148, 29, 0.15);
     border-color: var(--sl-primary);
-    color: #155724;
+    color: #664d03;
 }
 
 /* Form focus */
 .form-control:focus,
 .form-select:focus {
     border-color: var(--sl-primary);
-    box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(247, 148, 29, 0.25);
 }
 
 /* Footer */

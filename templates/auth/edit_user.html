@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Редактирование пользователя — Санлайн-Строй{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-pencil-square"></i> Редактировать: {{ user.username }}</h2>
+            <a href="{{ url_for('auth.user_list') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Назад
+            </a>
+        </div>
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Новый пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" minlength="6">
+                        <div class="form-text">Оставьте пустым, чтобы не менять пароль. Минимум 6 символов.</div>
+                    </div>
+                    {% if not user.is_admin %}
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль</label>
+                        <select class="form-select" id="role" name="role">
+                            <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Наблюдатель</option>
+                            <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Менеджер</option>
+                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Администратор</option>
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="mb-3">
+                        <label class="form-label">Роль</label>
+                        <input type="text" class="form-control" value="Администратор" disabled>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
