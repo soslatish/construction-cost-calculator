@@ -1,7 +1,43 @@
+import os
+import shutil
+import tempfile
 from functools import wraps
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, make_response
 from flask_login import login_required, current_user
 from models import db, Calculation, CalculationItem
+
+# Fix: Windows NamedTemporaryFile locks files, preventing reportlab from reopening them.
+import xhtml2pdf.files as _xf
+
+def _patched_get_named_tmp_file(self):
+    data = self.get_data()
+    tmp_file = tempfile.NamedTemporaryFile(suffix=self.suffix, delete=False)
+    if data:
+        tmp_file.write(data)
+        tmp_file.flush()
+        tmp_file.close()
+        _xf.files_tmp.append(tmp_file)
+    if self.path is None:
+        self.path = tmp_file.name
+    return tmp_file
+
+_xf.BaseFile.get_named_tmp_file = _patched_get_named_tmp_file
+
+_FONT_DIR = None
+
+def _ensure_fonts():
+    global _FONT_DIR
+    if _FONT_DIR and os.path.exists(os.path.join(_FONT_DIR, 'arial.ttf')):
+        return _FONT_DIR
+    fonts_src = os.path.join(os.path.dirname(__file__), 'static', 'fonts')
+    _FONT_DIR = os.path.join(os.path.expanduser('~'), '.pdffonts')
+    os.makedirs(_FONT_DIR, exist_ok=True)
+    for fn in ('arial.ttf', 'arialbd.ttf'):
+        dst = os.path.join(_FONT_DIR, fn)
+        if not os.path.exists(dst):
+            shutil.copy2(os.path.join(fonts_src, fn), dst)
+    return _FONT_DIR
+
 
 calc_bp = Blueprint('calc', __name__)
 
@@ -128,17 +164,22 @@ def report_pdf(calc_id):
         'overhead': 'Накладные расходы',
     }
 
+    font_dir = _ensure_fonts().replace('\\', '/')
+
     html = render_template('calculator/report_pdf.html',
                            calc=calc,
                            categories=categories,
                            category_totals=category_totals,
-                           category_names=category_names)
+                           category_names=category_names,
+                           font_dir=font_dir)
 
     try:
         from xhtml2pdf import pisa
         from io import BytesIO
+
         result_buf = BytesIO()
         pisa_status = pisa.CreatePDF(html, dest=result_buf, encoding='utf-8')
+
         if pisa_status.err:
             flash('Ошибка генерации PDF.', 'error')
             return redirect(url_for('calc.report', calc_id=calc_id))

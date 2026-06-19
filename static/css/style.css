@@ -239,6 +239,16 @@ h2 {
     font-weight: 700;
 }
 
+/* Navbar logo */
+.navbar-logo {
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.navbar-logo:hover {
+    opacity: 1;
+}
+
 /* Print */
 @media print {
     .navbar, footer, .btn, .no-print {

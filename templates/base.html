@@ -35,7 +35,7 @@
                     </li>
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav align-items-center">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <span class="nav-link">
@@ -60,6 +60,9 @@
                         <a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a>
                     </li>
                     {% endif %}
+                    <li class="nav-item ms-2">
+                        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="SLS Санлайнстрой" height="40" class="navbar-logo">
+                    </li>
                 </ul>
             </div>
         </div>

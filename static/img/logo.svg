@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 70" width="200" height="70">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#F7941D"/>
+      <stop offset="100%" stop-color="#E07B00"/>
+    </linearGradient>
+  </defs>
+  <!-- Main orange geometric block -->
+  <polygon points="5,5 75,5 85,15 85,40 75,50 5,50 0,45 0,10" fill="url(#grad)"/>
+  <!-- Angular connector element -->
+  <polygon points="75,5 95,5 105,15 105,40 95,50 75,50 85,40 85,15" fill="#E07B00"/>
+  <!-- SLS text -->
+  <text x="42" y="35" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="28" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">SLS</text>
+  <!-- САНЛАЙНСТРОЙ text -->
+  <text x="0" y="66" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="13" letter-spacing="1.5">
+    <tspan fill="#FFFFFF">САНЛАЙН</tspan><tspan fill="#F7941D">СТРОЙ</tspan>
+  </text>
+</svg>
